@@ -1,17 +1,38 @@
- <h1>Greeting Page</h1>
- <button id= "greets">Say Hello</button>
- <p id="responds">response area</p>
+ <h1 color="#00FFFF">Here we multiply 2 numbers</h1>
 
+<input id="numA" type="number" placeholder="first num">
+
+<input id="numB" type="number" placeholder="second num">
+
+ <button id= "operation">multiply</button>
+
+ <p id="result">????</p>
+<style>
+    h1 {
+  color: green;
+}
+</style>
 <script>
-let button=document.getElementById("greets");
-button.addEventListener("click", function() {
-  console.log("button clicked");
-    fetch("/hello")
-    .then(function(response) {
-     return response.json()
-    ;})
-    .then(function(data) {
-        document.getElementById("responds").textContent = data.response;
+
+    let button=document.getElementById("operation");
+    button.addEventListener("click", function() {
+        let a = Number(document.getElementById("numA").value);
+        let b = Number(document.getElementById("numB").value);
+        fetch("/multiply", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                a: a,
+                b: b
+            })
+        })
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
+            document.getElementById("result").textContent = data.result;
+        });
     });
-});
 </script>

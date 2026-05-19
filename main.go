@@ -5,21 +5,43 @@ import (
 	"log"
 	"net/http"
 )
+	type MultiplyRequest struct {
+		A int `json:"a"`
+		B int `json:"b"`
+	}
+	type MultiplyResponse struct {
+		Result int `json:"result"`
+	}
 
 func main() {
-	http.HandleFunc("/hello", GreetingHandler)
+	http.HandleFunc("/multiply", OperationsHandler)
 
 	fileServer := http.FileServer(http.Dir("./static"))
 	http.Handle("/", fileServer)
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
+
+	
 }
 
-func GreetingHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	data := map[string]string{
-		"response": "hello world",
+func OperationsHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+    	http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
 	}
-	json.NewEncoder(w).Encode(data)
+	var req MultiplyRequest
+
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+	response := MultiplyResponse{
+		Result: req.A * req.B,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
 
 }
+
