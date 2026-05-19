@@ -1,0 +1,17 @@
+ <h1>Greeting Page</h1>
+ <button id= "greets">Say Hello</button>
+ <p id="responds">response area</p>
+
+<script>
+let button=document.getElementById("greets");
+button.addEventListener("click", function() {
+  console.log("button clicked");
+    fetch("/hello")
+    .then(function(response) {
+     return response.json()
+    ;})
+    .then(function(data) {
+        document.getElementById("responds").textContent = data.response;
+    });
+});
+</script>
