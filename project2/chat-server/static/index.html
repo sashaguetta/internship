@@ -1,0 +1,49 @@
+<h1 style="color: #cd3a53;">Chat here</h1>
+<div class=" messages">
+    <div style="width: 100000px; height: 99px;" id="space" placeholder="chat will appear here"></div>
+    <span class="username"></span>
+    <p class="text"></p>
+    <time id="message-time"></time>
+</div>
+<button id="to-send">send</button>
+<input id="typing"  type="text" placeholder="type here">
+<script>
+function loadMessages() {
+        let chatBox = document.getElementById("space")
+
+        fetch("/messages", {
+            method : "GET",
+        })
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data){
+            chatBox.innerHTML = ""
+
+            data.forEach(function(message) {
+                chatBox.innerHTML = chatBox.innerHTML + message.text + "<br>"
+            })
+        });
+    }
+    
+    let button = document.getElementById("to-send");
+    button.addEventListener("click",function() {
+        let message = document.getElementById("typing").value
+        
+        
+        fetch("/message", {
+            method : "POST",
+            headers : {
+                "Content-Type" : "application/json"
+            },
+            body: JSON.stringify({
+               text: message
+            })
+         })
+        .then(function(response){
+        loadMessages()
+            
+         })
+     });
+        loadMessages()
+</script>
