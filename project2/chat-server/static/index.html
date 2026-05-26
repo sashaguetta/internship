@@ -1,49 +1,51 @@
-<h1 style="color: #cd3a53;">Chat here</h1>
-<div class=" messages">
-    <div style="width: 100000px; height: 99px;" id="space" placeholder="chat will appear here"></div>
-    <span class="username"></span>
-    <p class="text"></p>
-    <time id="message-time"></time>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: sans-serif; background: #1a1a2e; color: #e0e0e0; height: 100vh; display: flex; flex-direction: column; }
+  h1 { color: #cd3a53; padding: 16px; font-size: 1.2rem; border-bottom: 1px solid #2a2a4a; }
+  #space { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 8px; width: 100%; height: auto; }
+  #space .msg { background: #2a2a4a; padding: 8px 12px; border-radius: 8px; max-width: 70%; width: fit-content; }
+  .bottom { display: flex; gap: 8px; padding: 12px; border-top: 1px solid #2a2a4a; }
+  #typing { flex: 1; padding: 10px; border: 1px solid #2a2a4a; border-radius: 6px; background: #16213e; color: #e0e0e0; outline: none; }
+  #to-send { padding: 10px 20px; background: #cd3a53; color: white; border: none; border-radius: 6px; cursor: pointer; }
+  #to-send:hover { background: #e04460; }
+</style>
+
+<h1>Chat</h1>
+<div id="space"></div>
+<div class="bottom">
+  <input id="typing" type="text" placeholder="Type a message...">
+  <button id="to-send">Send</button>
 </div>
-<button id="to-send">send</button>
-<input id="typing"  type="text" placeholder="type here">
+
 <script>
-function loadMessages() {
-        let chatBox = document.getElementById("space")
-
-        fetch("/messages", {
-            method : "GET",
-        })
-        .then(function(response) {
-            return response.json();
-        })
-        .then(function(data){
-            chatBox.innerHTML = ""
-
-            data.forEach(function(message) {
-                chatBox.innerHTML = chatBox.innerHTML + message.text + "<br>"
-            })
+  function loadMessages() {
+    let chatBox = document.getElementById("space");
+    fetch("/messages")
+      .then(function(response) { return response.json(); })
+      .then(function(data) {
+        chatBox.innerHTML = "";
+        data.forEach(function(message) {
+          chatBox.innerHTML += '<div class="msg">' + message.text + '</div>';
         });
-    }
-    
-    let button = document.getElementById("to-send");
-    button.addEventListener("click",function() {
-        let message = document.getElementById("typing").value
-        
-        
-        fetch("/message", {
-            method : "POST",
-            headers : {
-                "Content-Type" : "application/json"
-            },
-            body: JSON.stringify({
-               text: message
-            })
-         })
-        .then(function(response){
-        loadMessages()
-            
-         })
-     });
-        loadMessages()
+        chatBox.scrollTop = chatBox.scrollHeight;
+      });
+  }
+
+  document.getElementById("to-send").addEventListener("click", function() {
+    let input = document.getElementById("typing");
+    let message = input.value;
+    if (!message) return;
+    input.value = "";
+    fetch("/message", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: message })
+    }).then(function() { loadMessages(); });
+  });
+
+  document.getElementById("typing").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") document.getElementById("to-send").click();
+  });
+
+  loadMessages();
 </script>
