@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/openai/openai-go"
+
 	"fmt"
 	"io"
 	"net/http"
@@ -9,10 +11,9 @@ import (
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
 )
-go get -u 'github.com/openai/openai-go@v1.12.0'
 
 var slackClient = slack.New(os.Getenv("SLACK_BOT_TOKEN"))
-var APIkey = os.Getenv("OPENAI_API_KEY")
+var openaiClient = openai.NewClient()
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Slack sent a request!")
