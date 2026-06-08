@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 
@@ -57,14 +56,18 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 		if message, ok := innerEvent.Data.(*slackevents.MessageEvent); ok {
 			fmt.Printf("[%s] %s: %s\n", message.Channel, message.User, message.Text)
+			response, err := askOpenAI(message.Text)
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+			}
 			if message.BotID == "" {
 				_, _, err := slackClient.PostMessage(
 					message.Channel,
-					slack.MsgOptionText(message.Text, false),
+					slack.MsgOptionText(response, false),
 				)
 
 				if err != nil {
-					fmt.Println("Error posting message:", err)
+					w.WriteHeader(http.StatusBadRequest)
 				}
 			}
 		}
@@ -74,11 +77,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	response, err := askOpenAI("Quelle est la capital de la france ?")
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(response)
 	http.HandleFunc("/slack/events", handler)
 
 	fmt.Println("Server running on :8080")
